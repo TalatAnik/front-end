@@ -1,8 +1,9 @@
-import { Box, Button, TextField } from '@mui/material'
+import { Box, Button, FormHelperText, TextField } from '@mui/material'
 import Paper from '@mui/material/Paper'
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import { ChangeEvent, FormEvent, useState } from 'react';
+import { useNavigate  } from 'react-router-dom';
 
 const LoginPaper = styled(Paper)(() => ({
   padding: 10,
@@ -20,6 +21,10 @@ const LoginPaper = styled(Paper)(() => ({
 function Login() {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState(false)
+  // const [helperText, setHelperText] = useState('Invalid username or password!');
+
+   const navigate = useNavigate()
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value)
@@ -34,24 +39,21 @@ function Login() {
     e.preventDefault()
 
     try {
-      const response = await axios.post('http://localhost:5000/users/login', {
+
+      axios.post('http://localhost:5000/users/login', {
         studentID: name,
         password: password,
       })
+      .then( response => {        
+        console.log(response.data)
+        setError(false)
+        navigate("/home")
+      })
+      .catch(error => {
+        console.log(error)
+        setError(true)
+      })
 
-      // Check if the response status code is successful
-        if (response.status === 200) {
-          const data = response.data;
-          // Handle the API response data
-          console.log(data)
-
-          // If the login is successful, you can navigate to another page using history.push()
-          // history.push('/home');
-        }
-        else {
-          // Handle the case when the response is not successful (e.g., login failed)
-          console.error('Login failed')
-        }
     }
     catch (error) {
       console.error('Error making API call:', error)
@@ -90,7 +92,7 @@ function Login() {
       >
         <TextField
           required
-          id="outlined-required"
+          id="outlined-input"
           label="Student ID"
           defaultValue=""
           sx={{
@@ -114,6 +116,13 @@ function Login() {
           value={password}
           onChange={handlePasswordChange}
         />
+
+        
+          <FormHelperText>
+            {error ? 'Invalid Student ID and Password' : ''}
+          </FormHelperText>
+        
+        
         <Button variant="contained" sx={{ my: 1 }} onClick={handleSumbit}>Login</Button>
       </LoginPaper>
       
